@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import org.apache.http.NoHttpResponseException;
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.OAuthErrorException;
@@ -182,7 +183,15 @@ protected BrokeredIdentityContext exchangeExternalImpl(EventBuilder event, Multi
         }
     }
 
-    public BrokeredIdentityContext sendTokenRequest(String authorizationCode, String clientId, String userDataJson, AuthenticationSessionModel authSession, String redirectUri) throws IOException {
+    public BrokeredIdentityContext retryTokenRequest(String authorizationCode, String clientId, String userDataJson, AuthenticationSessionModel authSession, String redirectUri) throws IOException {
+        try {
+            return sendTokenRequest(authorizationCode, clientId, userDataJson, authSession, redirectUri);
+        } catch (NoHttpResponseException e) {
+            return sendTokenRequest(authorizationCode, clientId, userDataJson, authSession, redirectUri);
+        }
+    }
+
+    private BrokeredIdentityContext sendTokenRequest(String authorizationCode, String clientId, String userDataJson, AuthenticationSessionModel authSession, String redirectUri) throws IOException {
         SimpleHttp.Response response = generateTokenRequest(authorizationCode, clientId, redirectUri).asResponse();
 
         if (response.getStatus() > 299) {
@@ -278,7 +287,7 @@ protected BrokeredIdentityContext exchangeExternalImpl(EventBuilder event, Multi
         String redirectUri = appRedirectUri != null ? appRedirectUri : Urls.identityProviderAuthnResponse(session.getContext().getUri().getBaseUri(), getConfig().getAlias(), session.getContext().getRealm().getName()).toString();
         try {
             prepareClientSecret(clientId);
-            return sendTokenRequest(authorizationCode, clientId, userJson, null, redirectUri);
+            return retryTokenRequest(authorizationCode, clientId, userJson, null, redirectUri);
         } catch (IOException e) {
             logger.warn("Error exchanging apple authorization_code. clientId=" + clientId, e);
             return null;
