@@ -1,0 +1,43 @@
+Apple Identity Provider for Keycloak - teamSANDOL fork
+
+이 소프트웨어는 아래 원본 저작물을 teamSANDOL이 수정한 것입니다.
+
+원본: Apple Identity Provider for Keycloak
+원본 저장소: https://github.com/klausbetz/apple-identity-provider-keycloak
+원본 저작권: Copyright 2022-2026 Klaus Betz and contributors
+라이선스: Apache License, Version 2.0 (LICENSE 파일 참고)
+
+기준 버전: 1.17.0 (상류 태그 1.17.0, 커밋 665011f)
+이 fork의 버전: 1.17.0-sandol.1
+대상 Keycloak: 26.8.1
+수정한 곳: teamSANDOL
+  https://github.com/teamSANDOL/apple-identity-provider-keycloak
+  브랜치 sandol/keycloak-26.8
+
+teamSANDOL이 바꾼 파일과 이유
+
+.gitignore
+  로컬 개발 도구가 만드는 폴더(.vscode/, bin/)가 커밋되지 않도록 무시 목록에 추가했습니다.
+
+build.gradle
+  Keycloak 26.8.1에 맞추려고 keycloakVersion을 26.5.0에서 26.8.1로 올렸습니다.
+  원본 릴리스와 구분하려고 version을 1.17.0에서 1.17.0-sandol.1로 바꿨습니다.
+
+gradle/wrapper/gradle-wrapper.properties
+  Keycloak 26.8.1 대응 빌드를 위해 Gradle wrapper를 8.0.2에서 8.14.6으로 올렸습니다.
+
+src/main/java/at/klausbetz/provider/AppleIdentityProvider.java
+  Keycloak 26.8.1에서 상위 클래스의 메서드 이름이 바뀌어 exchangeExternalTokenV1Impl을
+  exchangeExternalImpl로 고쳤습니다.
+  ID token에 이메일이 없으면 Apple이 보낸 user JSON의 이메일을 쓰도록 했습니다.
+  (상류 커밋 7e087bc)
+  Apple 토큰 응답이 없을 때(NoHttpResponseException) 토큰 요청을 한 번 다시 보내는
+  retryTokenRequest를 추가했습니다. (상류 커밋 085a73a, 이슈 #116)
+
+src/main/java/at/klausbetz/provider/AppleIdentityProviderEndpoint.java
+  토큰 요청에 retryTokenRequest를 쓰도록 바꿨습니다. 토큰 교환에 실패하면 502 오류 대신
+  로그인 화면으로 돌려보내도록 했습니다. (상류 커밋 085a73a, 이슈 #116, #118)
+
+src/main/java/at/klausbetz/provider/AppleUserRepresentation.java
+  user JSON의 이메일을 담으려고 email 필드와 getter, setter를 추가했습니다.
+  (상류 커밋 7e087bc)

@@ -1,3 +1,24 @@
+## 팀 fork 안내 (teamSANDOL)
+
+이 저장소는 teamSANDOL이 [klausbetz/apple-identity-provider-keycloak](https://github.com/klausbetz/apple-identity-provider-keycloak)을 fork해서 수정한 버전입니다. 원본은 Klaus Betz와 기여자들이 만들었고, Apache License 2.0으로 배포됩니다.
+
+- 원본 저장소: https://github.com/klausbetz/apple-identity-provider-keycloak
+- 기준 버전: 상류 1.17.0 태그 (커밋 665011f)
+- 이 fork의 버전: 1.17.0-sandol.1
+- 대상 Keycloak: 26.8.1
+- 작업 브랜치: `sandol/keycloak-26.8` (`main`은 상류와 맞추는 용도로만 씁니다)
+
+이 브랜치에서 바꾼 내용
+
+1. Keycloak 26.8.1 대응: `keycloakVersion`을 26.5.0에서 26.8.1로, Gradle wrapper를 8.0.2에서 8.14.6으로 올렸습니다. 26.8.1에서 메서드 이름이 바뀌어 `exchangeExternalTokenV1Impl`을 `exchangeExternalImpl`로 고쳤습니다.
+2. ID token에 이메일이 없으면 Apple이 보낸 user JSON에서 이메일을 가져옵니다. 상류 main에 들어갔지만 아직 릴리스되지 않은 커밋 7e087bc를 cherry-pick했습니다.
+3. Apple 토큰 응답이 없으면(`NoHttpResponseException`) 토큰 요청을 한 번 다시 보냅니다([상류 #116](https://github.com/klausbetz/apple-identity-provider-keycloak/issues/116)). 인가 코드가 만료되는 등의 이유로 토큰 교환에 실패하면 502 오류 대신 로그인 화면으로 돌려보냅니다([상류 #118](https://github.com/klausbetz/apple-identity-provider-keycloak/issues/118)). 상류 `114-fix` 브랜치에서 아직 병합되지 않은 커밋 085a73a를 cherry-pick했습니다.
+4. `.gitignore`에 `.vscode/`와 `bin/`을 추가했습니다.
+
+바꾼 파일과 이유는 [NOTICE](NOTICE)에 정리했습니다. 아래부터는 원본 README입니다. 설치 안내에 나오는 JAR 링크와 호환표는 원본 저장소 기준입니다. 이 fork의 JAR은 [이 저장소의 Releases](https://github.com/teamSANDOL/apple-identity-provider-keycloak/releases)에서 받습니다.
+
+---
+
 # Apple Identity Provider for Keycloak :apple:
 
 This repository represents an extension for [Keycloak](https://www.keycloak.org), which
